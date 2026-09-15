@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FB Photo Extractor - Download All Embedded & Scrollable Images</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-background">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span>Facebook Multi-Photo Scraper</span>
+      </div>
+      <h1 class="title">Extract & Download <span class="gradient-text">All Photos</span> From Any FB Post</h1>
+      <p class="subtitle">
+        Facebook only shows up to 4–5 images in the feed grid, hiding the rest behind scrollable carousels.
+        This tool walks through the post and extracts <strong>every single full-resolution image</strong> ready to download as a ZIP.
+      </p>
+    </header>
+
+    <!-- Search Input Section -->
+    <section class="card input-card">
+      <form id="extractForm" class="form">
+        <div class="input-wrapper">
+          <div class="input-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+          </div>
+          <input 
+            type="url" 
+            id="urlInput" 
+            placeholder="Paste Facebook post, album, or share link here..." 
+            required 
+            autocomplete="off"
+          />
+          <button type="button" id="pasteBtn" class="btn btn-secondary btn-icon-only" title="Paste from clipboard">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+            </svg>
+          </button>
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            <span class="btn-text">Extract Photos</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="sample-links">
+          <span class="sample-label">Try sample link:</span>
+          <button type="button" class="chip" data-url="https://www.facebook.com/NASA">NASA Public Page</button>
+          <button type="button" class="chip" data-url="https://www.facebook.com/NationalGeographic">National Geographic</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Progress Card -->
+    <section id="progressSection" class="card progress-card hidden">
+      <div class="progress-header">
+        <div class="progress-status-info">
+          <div class="spinner"></div>
+          <div>
+            <h4 id="progressStatus">Starting extraction engine...</h4>
+            <p id="progressDetail">Initializing browser and connecting to post</p>
+          </div>
+        </div>
+        <div id="progressPercentBadge" class="percent-badge">10%</div>
+      </div>
+      <div class="progress-bar-track">
+        <div id="progressBar" class="progress-bar-fill" style="width: 10%;"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="step-item active" id="step1"><span>1</span> Connect</div>
+        <div class="step-item" id="step2"><span>2</span> Preloaded</div>
+        <div class="step-item" id="step3"><span>3</span> Unlock Hidden Photos</div>
+        <div class="step-item" id="step4"><span>4</span> Complete</div>
+      </div>
+    </section>
+
+    <!-- Error Alert -->
+    <div id="errorAlert" class="alert alert-error hidden">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="errorMessage">Extraction failed</span>
+    </div>
+
+    <!-- Results Section -->
+    <section id="resultsSection" class="results-section hidden">
+      <!-- Summary & Actions Toolbar -->
+      <div class="card toolbar-card">
+        <div class="toolbar-left">
+          <h3 id="resultTitle" class="result-title">Discovered Photos</h3>
+          <span id="photoCountBadge" class="count-badge">0 photos</span>
+        </div>
+        <div class="toolbar-right">
+          <button type="button" id="selectAllBtn" class="btn btn-outline">Select All</button>
+          <button type="button" id="deselectAllBtn" class="btn btn-outline">Deselect All</button>
+          <button type="button" id="downloadZipBtn" class="btn btn-success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+            <span id="zipBtnText">Download All as ZIP</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Post snippet (if available) -->
+      <div id="postMetaCard" class="card post-meta-card hidden">
+        <p id="postTextSnippet" class="post-snippet"></p>
+      </div>
+
+      <!-- Photo Grid -->
+      <div id="photoGrid" class="photo-grid"></div>
+    </section>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div id="lightboxModal" class="lightbox-modal hidden">
+    <div class="lightbox-backdrop"></div>
+    <div class="lightbox-content">
+      <button type="button" id="lightboxClose" class="lightbox-btn close-btn" title="Close (Esc)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <button type="button" id="lightboxPrev" class="lightbox-btn prev-btn" title="Previous (Left Arrow)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <button type="button" id="lightboxNext" class="lightbox-btn next-btn" title="Next (Right Arrow)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+
+      <div class="lightbox-image-wrapper">
+        <img id="lightboxImg" src="" alt="Full Resolution Facebook Photo">
+      </div>
+
+      <div class="lightbox-footer">
+        <span id="lightboxCounter">Photo 1 of 1</span>
+        <button type="button" id="lightboxDownloadBtn" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download Original
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
