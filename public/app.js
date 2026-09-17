@@ -124,6 +124,56 @@ function setProgress(percent, status, detail, step) {
   if (step >= 4) step4.classList.add('done');
 }
 
+// function startExtraction(url) {
+//   // Reset state
+//   errorAlert.classList.add('hidden');
+//   resultsSection.classList.add('hidden');
+//   progressSection.classList.remove('hidden');
+//   submitBtn.disabled = true;
+//   submitBtn.style.opacity = '0.7';
+
+//   setProgress(10, 'Initializing crawler...', 'Launching browser to load post', 1);
+
+//   if (eventSource) {
+//     eventSource.close();
+//   }
+
+//   const streamUrl = `/api/extract-stream?url=${encodeURIComponent(url)}&maxImages=120`;
+//   eventSource = new EventSource(streamUrl);
+
+//   eventSource.addEventListener('progress', (e) => {
+//     try {
+//       const data = JSON.parse(e.data);
+//       let stepNum = 1;
+//       if (data.step === 'navigating' || data.step === 'bypassing') stepNum = 1;
+//       else if (data.step === 'parsing_scripts' || data.step === 'initial_captured') stepNum = 2;
+//       else if (data.step === 'opening_viewer' || data.step === 'walking_carousel' || data.step === 'stepping') stepNum = 3;
+//       else if (data.step === 'finalizing' || data.step === 'complete') stepNum = 4;
+
+//       setProgress(data.percent || 30, data.message, `Captured: ${data.imageCount || 0} photos so far`, stepNum);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   });
+
+//   eventSource.addEventListener('complete', (e) => {
+//     try {
+//       const result = JSON.parse(e.data);
+//       eventSource.close();
+//       onExtractionSuccess(result);
+//     } catch (err) {
+//       onExtractionError('Failed to parse extraction results');
+//     }
+//   });
+
+//   eventSource.addEventListener('error', (e) => {
+//     console.warn('SSE stream notice, checking fallback...', e);
+//     eventSource.close();
+//     // Try fallback standard POST in case SSE dropped
+//     fallbackPostExtraction(url);
+//   });
+// }
+
 function startExtraction(url) {
   // Reset state
   errorAlert.classList.add('hidden');
@@ -132,47 +182,23 @@ function startExtraction(url) {
   submitBtn.disabled = true;
   submitBtn.style.opacity = '0.7';
 
-  setProgress(10, 'Initializing crawler...', 'Launching browser to load post', 1);
+  setProgress(
+    10,
+    'Initializing crawler...',
+    'Launching browser to load post',
+    1
+  );
 
+  // Close any previous SSE connection
   if (eventSource) {
     eventSource.close();
+    eventSource = null;
   }
 
-  const streamUrl = `/api/extract-stream?url=${encodeURIComponent(url)}&maxImages=120`;
-  eventSource = new EventSource(streamUrl);
-
-  eventSource.addEventListener('progress', (e) => {
-    try {
-      const data = JSON.parse(e.data);
-      let stepNum = 1;
-      if (data.step === 'navigating' || data.step === 'bypassing') stepNum = 1;
-      else if (data.step === 'parsing_scripts' || data.step === 'initial_captured') stepNum = 2;
-      else if (data.step === 'opening_viewer' || data.step === 'walking_carousel' || data.step === 'stepping') stepNum = 3;
-      else if (data.step === 'finalizing' || data.step === 'complete') stepNum = 4;
-
-      setProgress(data.percent || 30, data.message, `Captured: ${data.imageCount || 0} photos so far`, stepNum);
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  eventSource.addEventListener('complete', (e) => {
-    try {
-      const result = JSON.parse(e.data);
-      eventSource.close();
-      onExtractionSuccess(result);
-    } catch (err) {
-      onExtractionError('Failed to parse extraction results');
-    }
-  });
-
-  eventSource.addEventListener('error', (e) => {
-    console.warn('SSE stream notice, checking fallback...', e);
-    eventSource.close();
-    // Try fallback standard POST in case SSE dropped
-    fallbackPostExtraction(url);
-  });
+  // Use the Vercel-compatible JSON API directly
+  fallbackPostExtraction(url);
 }
+
 
 async function fallbackPostExtraction(url) {
   try {
