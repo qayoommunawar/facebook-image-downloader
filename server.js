@@ -93,9 +93,20 @@ app.post('/api/extract', async (req, res) => {
   }
 
   try {
+    // console.log(`Starting extraction for: ${url}`);
+    // const result = await extractFacebookPhotos(url, { maxImages });
+    // res.json({ success: true, ...result });
     console.log(`Starting extraction for: ${url}`);
+
+    const startTime = Date.now();
+
     const result = await extractFacebookPhotos(url, { maxImages });
-    res.json({ success: true, ...result });
+
+    console.log(
+        `Extraction finished in ${Date.now() - startTime}ms with ${result.totalCount} images`
+      );
+
+res.json({ success: true, ...result });
   } catch (err) {
     console.error('Extraction error:', err);
     res.status(500).json({ error: err.message || 'Failed to extract images from Facebook post' });

@@ -6,8 +6,8 @@ async function testApi() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      url: 'https://www.facebook.com/NASA',
-      maxImages: 10
+      url: 'https://www.facebook.com/share/p/14gRh7bHfx7/',
+      maxImages: 120
     })
   });
 
