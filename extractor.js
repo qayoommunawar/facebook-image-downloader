@@ -1,4 +1,5 @@
 import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import fs from 'fs';
 
 const CHROME_PATHS = [
@@ -81,8 +82,13 @@ export async function extractFacebookPhotos(
   onProgress = () => {}
 ) {
   const targetUrl = normalizeFacebookUrl(rawUrl);
-  const maxWalkSteps = options.maxImages || 120;
-  const executablePath = getBrowserExecutable();
+const maxWalkSteps = options.maxImages || 120;
+
+const isVercel = !!process.env.VERCEL;
+
+const executablePath = isVercel
+  ? await chromium.executablePath()
+  : getBrowserExecutable();
 
   onProgress({
     step: 'init',
@@ -90,18 +96,39 @@ export async function extractFacebookPhotos(
     percent: 10
   });
 
+  // const browser = await puppeteer.launch({
+  //   executablePath,
+  //   headless: true,
+  //   args: [
+  //     '--no-sandbox',
+  //     '--disable-setuid-sandbox',
+  //     '--disable-blink-features=AutomationControlled',
+  //     '--disable-features=IsolateOrigins,site-per-process',
+  //     '--disable-infobars',
+  //     '--window-size=1440,900'
+  //   ]
+  // });
+
   const browser = await puppeteer.launch({
-    executablePath,
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-blink-features=AutomationControlled',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--disable-infobars',
-      '--window-size=1440,900'
-    ]
-  });
+  executablePath,
+  headless: isVercel ? 'shell' : true,
+  args: isVercel
+    ? [
+        ...chromium.args,
+        '--disable-blink-features=AutomationControlled',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--disable-infobars',
+        '--window-size=1440,900'
+      ]
+    : [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--disable-infobars',
+        '--window-size=1440,900'
+      ]
+});
 
   const capturedMap = new Map();
   const photoOrder = [];
